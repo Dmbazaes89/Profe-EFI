@@ -502,64 +502,438 @@ function PagePlan({ db, curso, mutate }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// PAGE: IA MINEDUC
+// PAGE: IA MINEDUC — Currículo oficial completo 1° básico a 4° medio
 // ═══════════════════════════════════════════════════════════════════════════
+
+// Currículo embebido directamente (subset completo de OA reales MINEDUC)
+const CURRICULO = {
+  niveles: {
+    "1b":"1° Básico","2b":"2° Básico","3b":"3° Básico","4b":"4° Básico",
+    "5b":"5° Básico","6b":"6° Básico","7b":"7° Básico","8b":"8° Básico",
+    "1m":"1° Medio","2m":"2° Medio","3m":"3° Medio","4m":"4° Medio",
+  },
+  ejesPorNivel: (nivel) => {
+    if (["1b","2b","3b","4b","5b","6b"].includes(nivel))
+      return { hm:"Habilidades motrices", vas:"Vida activa y saludable", sjl:"Seguridad, juego limpio y liderazgo" };
+    return { hm:"Habilidades motrices", cf:"Condición física y entrenamiento", dep:"Deportes y actividades físicas", sjl:"Seguridad, juego limpio y liderazgo" };
+  },
+  oas: {
+    "1b": {
+      hm:[
+        { id:"OA1", texto:"Ejecutar habilidades motrices básicas de locomoción (correr, saltar, galopar, rodar, trepar), manipulación (lanzar, patear, cachar) y estabilidad (girar, balancear), demostrando coordinación y dominio corporal.", indicadores:["Corre cambiando dirección y velocidad","Salta con ambos pies y en un pie","Lanza y cacha objetos de distintos tamaños","Mantiene equilibrio en diferentes posturas"] },
+        { id:"OA2", texto:"Demostrar orientación espacial al relacionarse con un objeto o compañero, identificando nociones de posición, dirección y distancia.", indicadores:["Ubica objetos arriba/abajo, adelante/atrás","Reconoce izquierda y derecha en el espacio","Se desplaza siguiendo trayectorias indicadas"] },
+      ],
+      vas:[
+        { id:"OA6", texto:"Ejecutar actividades físicas de intensidad moderada a vigorosa mediante juegos y circuitos, incrementando progresivamente la condición física.", indicadores:["Participa en juegos durante tiempo determinado","Ejecuta ejercicios con peso propio","Completa circuitos de desplazamiento","Realiza carreras cortas mejorando velocidad"] },
+        { id:"OA7", texto:"Demostrar hábitos de higiene personal antes, durante y después de la actividad física.", indicadores:["Practica aseo personal post-ejercicio","Conoce importancia de la hidratación"] },
+      ],
+      sjl:[
+        { id:"OA9",  texto:"Practicar actividades físicas de manera segura, siguiendo instrucciones del profesor y reglas del juego.", indicadores:["Sigue instrucciones del docente","Cuida materiales e instalaciones","Respeta el turno de sus compañeros"] },
+        { id:"OA10", texto:"Participar en juegos colectivos con actitudes de juego limpio, respeto y responsabilidad.", indicadores:["Acepta resultados del juego","Respeta a compañeros y rivales","Cumple roles asignados"] },
+      ],
+    },
+    "2b": {
+      hm:[
+        { id:"OA1", texto:"Ejecutar habilidades motrices de locomoción (saltar la cuerda, galopar), manipulación (botar balón de forma continua, lanzar y cachar con una y dos manos) y estabilidad (suspenderse, girar, hacer volteretas).", indicadores:["Salta la cuerda rítmicamente","Bota balón al caminar de forma continua","Ejecuta volteretas hacia adelante con control","Se suspende en barras o espalderas"] },
+      ],
+      vas:[
+        { id:"OA6", texto:"Ejecutar actividades físicas de intensidad moderada a vigorosa usando el peso propio y objetos simples en juegos y circuitos.", indicadores:["Completa actividad durante períodos más largos","Ejecuta circuitos con diferentes estaciones","Reconoce señales corporales del esfuerzo"] },
+      ],
+      sjl:[
+        { id:"OA9",  texto:"Participar en actividades físicas de manera segura, identificando acciones y situaciones de riesgo.", indicadores:["Identifica riesgos en el espacio físico","Actúa con precaución con materiales"] },
+        { id:"OA10", texto:"Asumir roles dentro del juego colectivo, respetando reglas y decisiones de los compañeros.", indicadores:["Toma roles de líder y seguidor","Respeta normas del juego"] },
+      ],
+    },
+    "3b": {
+      hm:[
+        { id:"OA1", texto:"Combinar e integrar habilidades motrices básicas de locomoción, manipulación y estabilidad en situaciones de juego colectivo, resolviendo problemas de espacio, tiempo y número de personas.", indicadores:["Combina correr y lanzar en secuencia","Integra habilidades en juegos con reglas","Ejecuta circuitos que combinan distintas habilidades"] },
+      ],
+      vas:[
+        { id:"OA6", texto:"Ejecutar actividades físicas de intensidad moderada a vigorosa, identificando las respuestas corporales al ejercicio: aumento de FC, respiración y temperatura.", indicadores:["Identifica aumento de FC post-ejercicio","Registra tiempo de actividad continua","Describe sensaciones durante el esfuerzo"] },
+      ],
+      sjl:[
+        { id:"OA9",  texto:"Practicar actividad física con responsabilidad y honestidad, asumiendo roles y respetando reglas sin supervisión directa.", indicadores:["Acepta decisiones del árbitro","Cumple roles dentro del equipo","Respeta reglas sin supervisión directa"] },
+        { id:"OA10", texto:"Participar en actividades físicas en entorno natural, reconociendo la importancia del cuidado del medioambiente.", indicadores:["Cuida el entorno donde realiza actividad física","Participa en actividades en entorno natural"] },
+      ],
+    },
+    "4b": {
+      hm:[
+        { id:"OA1", texto:"Controlar y combinar habilidades de locomoción, manipulación y estabilidad al practicar juegos colectivos con estrategias básicas.", indicadores:["Aplica estrategias básicas en juegos colectivos","Combina desplazamiento con manejo de balón","Resuelve problemas de espacio en juego"] },
+        { id:"OA2", texto:"Medir la frecuencia cardiaca antes y después del ejercicio y registrar los datos obtenidos.", indicadores:["Mide FC por palpación (15 seg × 4)","Registra FC en reposo y post-ejercicio","Compara valores de FC en distintos momentos"] },
+      ],
+      vas:[
+        { id:"OA6", texto:"Participar en actividades físicas de intensidad moderada a vigorosa monitoreando el esfuerzo mediante la medición de la frecuencia cardiaca.", indicadores:["Mantiene FC en zona aeróbica","Autorregula intensidad según FC","Registra datos de FC en planilla"] },
+      ],
+      sjl:[
+        { id:"OA9",  texto:"Practicar juegos predeportivos aplicando reglas con responsabilidad, honestidad y respeto por la autoridad.", indicadores:["Aplica reglas en juegos predeportivos","Acepta resultados adversos con actitud deportiva"] },
+        { id:"OA10", texto:"Ejecutar movimientos de danzas tradicionales chilenas demostrando coordinación y expresión.", indicadores:["Ejecuta pasos básicos de cueca u otra danza","Coordina movimientos con la música"] },
+      ],
+    },
+    "5b": {
+      hm:[
+        { id:"OA1", texto:"Aplicar habilidades motrices básicas en el contexto de deportes individuales (atletismo, natación, gimnasia) y colectivos (fútbol, básquetbol, voleibol, handball), resolviendo problemas tácticos básicos.", indicadores:["Aplica fundamentos técnicos de al menos un deporte individual","Aplica fundamentos de al menos un deporte colectivo","Resuelve problemas tácticos básicos en juego real"] },
+      ],
+      vas:[
+        { id:"OA6", texto:"Practicar actividad física de intensidad moderada a vigorosa de forma regular, identificando sus beneficios para la salud.", indicadores:["Describe beneficios de la actividad regular","Lleva registro de actividad física semanal","Participa activamente en todas las sesiones"] },
+      ],
+      sjl:[
+        { id:"OA8",  texto:"Demostrar actitudes de juego limpio, respeto y liderazgo al participar en deportes colectivos e individuales.", indicadores:["Asume liderazgo positivo en el equipo","Gestiona conflictos con fairplay","Motiva a compañeros durante la actividad"] },
+        { id:"OA9",  texto:"Practicar actividad física en distintos entornos (exterior, sala, naturaleza) con autocuidado y seguridad.", indicadores:["Identifica riesgos en distintos entornos","Aplica medidas de autocuidado"] },
+        { id:"OA11", texto:"Ejecutar una danza nacional con coordinación, expresión y conocimiento de su contexto cultural.", indicadores:["Ejecuta cueca u otra danza nacional con coordinación","Conoce el contexto cultural de la danza"] },
+      ],
+    },
+    "6b": {
+      hm:[
+        { id:"OA1", texto:"Demostrar la aplicación de habilidades motrices básicas en una variedad de actividades deportivas individuales y colectivas, con mayor dominio técnico.", indicadores:["Ejecuta al menos tres deportes individuales o colectivos","Demuestra progresión técnica respecto al año anterior","Aplica fundamentos técnicos con mayor precisión"] },
+        { id:"OA2", texto:"Aplicar estrategias básicas en deportes colectivos, asumiendo roles de ataque, defensa y otros.", indicadores:["Implementa estrategias ofensivas y defensivas","Adapta su rol según la situación del juego","Toma decisiones tácticas en tiempo real"] },
+      ],
+      vas:[
+        { id:"OA6", texto:"Desarrollar resistencia, fuerza, flexibilidad y velocidad mediante actividades progresivas, monitoreando la FC y el esfuerzo.", indicadores:["Completa circuitos de condición física","Registra FC y relaciona con intensidad del esfuerzo","Reconoce los cuatro componentes de la condición física"] },
+      ],
+      sjl:[
+        { id:"OA8",  texto:"Asumir roles de liderazgo promoviendo participación equitativa y respeto por diferencias individuales.", indicadores:["Lidera grupos en actividades físicas","Promueve participación de todos","Respeta diferencias de condición física y habilidad"] },
+        { id:"OA11", texto:"Ejecutar una danza nacional con dominio de pasos, expresión corporal y valoración del patrimonio cultural.", indicadores:["Coordina pasos con música","Demuestra expresión corporal","Valora la danza como patrimonio"] },
+      ],
+    },
+    "7b": {
+      hm:[
+        { id:"OA1", texto:"Aplicar, combinar y ajustar habilidades motrices específicas en al menos un deporte individual y uno de oposición, con coordinación y dominio técnico.", indicadores:["Aplica fundamentos técnicos del deporte individual elegido","Ejecuta acciones defensivas y ofensivas en deporte de oposición","Combina habilidades en situación de juego real"] },
+        { id:"OA2", texto:"Aplicar variedad de estrategias y tácticas para resolver problemas durante juegos o deportes (atacar, defender, recuperar posesión).", indicadores:["Implementa al menos dos estrategias de ataque","Aplica principios defensivos básicos","Toma decisiones tácticas en situación real"] },
+      ],
+      dep:[
+        { id:"OA5", texto:"Combinar, aplicar y ajustar habilidades motrices en deporte de colaboración y de oposición/colaboración, con toma de decisiones, estrategias y reglas.", indicadores:["Ejecuta deportes de colaboración (voleibol, básquetbol)","Aplica principios tácticos ofensivos y defensivos","Trabaja en equipo para lograr objetivos comunes"] },
+      ],
+      cf:[
+        { id:"OA3", texto:"Desarrollar resistencia cardiovascular, fuerza muscular, flexibilidad y velocidad aplicando principios FIDT (frecuencia, intensidad, duración y tipo).", indicadores:["Identifica los cuatro principios FIDT","Aplica principios FIDT en circuitos físicos","Mide y registra FC antes, durante y después del ejercicio","Reconoce zonas de FC para entrenamiento aeróbico"] },
+        { id:"OA4", texto:"Practicar actividad física en distintos entornos con autocuidado, seguridad y conductas de vida saludable.", indicadores:["Aplica normas de seguridad en espacios deportivos","Identifica conductas de autocuidado en el deporte"] },
+      ],
+      sjl:[
+        { id:"OA6", texto:"Demostrar actitudes de juego limpio, trabajo en equipo y liderazgo positivo en actividades físicas y deportivas.", indicadores:["Gestiona victorias y derrotas con actitud deportiva","Lidera y motiva a compañeros","Respeta al árbitro y las decisiones del juego"] },
+      ],
+    },
+    "8b": {
+      hm:[
+        { id:"OA1", texto:"Aplicar con mayor dominio técnico habilidades motrices específicas en deportes de oposición/colaboración y en una secuencia de danza.", indicadores:["Ejecuta habilidades técnicas con mayor precisión","Aplica combinaciones técnicas en situación de juego","Demuestra progresión respecto al año anterior"] },
+      ],
+      dep:[
+        { id:"OA5", texto:"Aplicar con precisión habilidades motrices en deporte de oposición/colaboración, coordinando movimientos en una secuencia de danza.", indicadores:["Ejecuta secuencias técnicas en el deporte elegido","Coordina movimientos corporales en danza"] },
+      ],
+      cf:[
+        { id:"OA3", texto:"Aplicar los principios FIDRPT (frecuencia, intensidad, duración, recuperación, progresión y tipo) para diseñar un plan de entrenamiento físico personal.", indicadores:["Diseña plan de entrenamiento con principios FIDRPT","Aplica y registra resultados del plan","Evalúa condición física inicial y final","Ajusta el plan según resultados"] },
+        { id:"OA4", texto:"Diseñar y aplicar un plan de entrenamiento para condición física saludable, estableciendo metas personales.", indicadores:["Establece metas de condición física personales","Diseña plan de 4–6 semanas","Registra ingesta calórica y gasto energético básico"] },
+      ],
+      sjl:[
+        { id:"OA6", texto:"Liderar y promover actividades físicas y deportivas en la comunidad escolar, asumiendo roles de organización.", indicadores:["Organiza una actividad física para el curso","Promueve participación activa de compañeros"] },
+      ],
+    },
+    "1m": {
+      hm:[
+        { id:"OA1", texto:"Aplicar con mayor control habilidades motrices específicas en al menos un deporte de colaboración y uno de oposición/colaboración, evaluando estrategias.", indicadores:["Aplica estrategias complejas en deporte de colaboración","Evalúa efectividad de tácticas usadas","Demuestra dominio técnico superior al año anterior"] },
+      ],
+      cf:[
+        { id:"OA3", texto:"Aplicar principios de entrenamiento (FIDRPT) para desarrollar un plan personal de condición física de mayor complejidad.", indicadores:["Diseña plan de 4–6 semanas con variables FIDRPT","Incluye resistencia, fuerza, flexibilidad y velocidad","Monitorea FC y percepción de esfuerzo (Borg)","Evalúa y ajusta el plan según resultados"] },
+      ],
+      vas:[
+        { id:"OA4", texto:"Practicar actividad física de forma segura y responsable, monitoreando el esfuerzo y aplicando conductas de vida saludable.", indicadores:["Monitorea FC y escala de esfuerzo","Conoce relación entre sueño, alimentación y rendimiento","Identifica factores de riesgo para la salud deportiva"] },
+      ],
+      sjl:[
+        { id:"OA5", texto:"Participar y promover actividades físicas en la comunidad escolar, asumiendo roles de liderazgo y organización.", indicadores:["Organiza actividad deportiva para el curso","Promueve vida activa entre sus pares"] },
+      ],
+    },
+    "2m": {
+      hm:[
+        { id:"OA1", texto:"Diseñar, aplicar y evaluar estrategias y tácticas en juegos o deportes, demostrando dominio técnico y pensamiento táctico.", indicadores:["Diseña estrategias ofensivas y defensivas","Evalúa efectividad de las tácticas aplicadas","Ajusta estrategias en tiempo real"] },
+        { id:"OA2", texto:"Perfeccionar y aplicar con precisión habilidades motrices en al menos un deporte y en una danza.", indicadores:["Demuestra dominio técnico en el deporte elegido","Ejecuta secuencia de danza con coordinación y expresión"] },
+      ],
+      cf:[
+        { id:"OA3", texto:"Diseñar, aplicar y evaluar un plan de entrenamiento personal avanzado, considerando principios de periodización básica.", indicadores:["Diseña plan con macrociclo y microciclo básico","Evalúa progresión de condición física","Ajusta variables según resultados"] },
+      ],
+      sjl:[
+        { id:"OA5", texto:"Promover la práctica regular de actividad física liderando proyectos deportivos y saludables en la comunidad.", indicadores:["Diseña y ejecuta proyecto deportivo para el colegio","Evalúa el impacto del proyecto"] },
+      ],
+    },
+    "3m": {
+      hm:[
+        { id:"OA1", texto:"Diseñar y aplicar un plan de entrenamiento personal con metas de condición física, seguimiento y evaluación de resultados.", indicadores:["Establece metas SMART de condición física","Diseña plan de 6 semanas con principios de entrenamiento","Evalúa progresión y ajusta variables","Presenta informe de resultados"] },
+      ],
+      sjl:[
+        { id:"OA4", texto:"Promover y evaluar el impacto de proyectos deportivos que fomenten autocuidado y vida activa.", indicadores:["Planifica proyecto deportivo comunitario","Evalúa indicadores de participación e impacto","Presenta resultados y aprendizajes"] },
+        { id:"OA5", texto:"Analizar cómo los factores del entorno (infraestructura, cultura, familia, políticas) favorecen o dificultan la actividad física.", indicadores:["Identifica factores facilitadores y obstaculizadores","Propone soluciones a barreras de actividad física"] },
+      ],
+    },
+    "4m": {
+      hm:[
+        { id:"OA1", texto:"Diseñar, aplicar y evaluar un plan de entrenamiento avanzado con periodización, integrando variables de bienestar integral.", indicadores:["Integra principios de periodización básica","Incluye monitoreo de salud y bienestar emocional","Evalúa impacto del plan en calidad de vida"] },
+      ],
+      sjl:[
+        { id:"OA4", texto:"Planificar y liderar proyectos deportivos que promuevan la actividad física en la comunidad.", indicadores:["Lidera equipo en organización de evento deportivo","Diseña estrategia de convocatoria e inclusión","Evalúa el impacto del proyecto"] },
+        { id:"OA5", texto:"Analizar críticamente los factores sociales, culturales y económicos que influyen en la actividad física y salud en la sociedad chilena.", indicadores:["Analiza estadísticas de actividad física en Chile","Propone iniciativas de política pública deportiva"] },
+      ],
+    },
+  },
+};
+
+const getOAs = (nivel, eje) => CURRICULO.oas[nivel]?.[eje] || [];
+const getNivelLabel = (nivel) => CURRICULO.niveles[nivel] || nivel;
+const getEjes = (nivel) => CURRICULO.ejesPorNivel(nivel);
+
+// Contenidos mínimos obligatorios por nivel (Planes y Programas MINEDUC)
+const CONTENIDOS_MINIMOS = {
+  "1b": { deportes:["juegos de persecución","juegos de saltar la cuerda","juegos con balón","circuitos motores"], danza:"danzas folclóricas simples chilenas", test:"test de carrera 30 metros y salto en largo parado" },
+  "2b": { deportes:["juegos predeportivos","circuitos con obstáculos","juegos con implementos"], danza:"danzas rítmicas simples", test:"test de carrera y coordinación" },
+  "3b": { deportes:["juegos colectivos con reglas simples","fútbol base","básquetbol base"], danza:"cueca básica", test:"test de resistencia y habilidad motriz" },
+  "4b": { deportes:["fútbol predeportivo","básquetbol predeportivo","voleibol base"], danza:"cueca y danzas tradicionales chilenas", test:"test de Cooper (modificado 6 min), salto en largo, abdominales 30 seg" },
+  "5b": { deportes:["fútbol","básquetbol","voleibol","atletismo (carreras y saltos)"], danza:"cueca y marinera", test:"test de Cooper (12 min), salto en largo, abdominales 1 min, flexión tronco" },
+  "6b": { deportes:["fútbol","básquetbol","voleibol","handball","atletismo"], danza:"cueca y otra danza tradicional", test:"test de Cooper, salto en largo, abdominales 1 min, velocidad 50m, flexión tronco" },
+  "7b": { deportes:["básquetbol (fundamentos técnicos + táctica básica)","voleibol (toque, mancheta, saque)","fútbol (control, pase, posicionamiento)","atletismo (velocidad, fondo, saltos)"], danza:"danza moderna o folclórica", test:"test de Cooper (12 min), Course Navette, salto largo, abdominales, velocidad 50m" },
+  "8b": { deportes:["básquetbol (sistemas de juego)","voleibol (ataque y defensa)","fútbol (estrategia)","atletismo (técnica de carrera)","deporte a elección del curso"], danza:"danza libre o folclórica", test:"Course Navette, salto largo, abdominales 1 min, velocidad 50m, flexión de brazos" },
+  "1m": { deportes:["deporte colectivo a elección","deporte individual a elección","acondicionamiento físico"], danza:"danza a elección", test:"Course Navette, salto largo, abdominales 1 min, velocidad 50m, flexión de brazos" },
+  "2m": { deportes:["deporte colectivo (tácticas avanzadas)","deporte individual (técnica refinada)","plan de entrenamiento personal"], danza:"danza a elección", test:"batería completa de condición física + evaluación técnica deportiva" },
+  "3m": { deportes:["deporte o actividad física a elección","proyecto deportivo comunitario"], danza:"danza libre", test:"batería personalizada según plan de entrenamiento" },
+  "4m": { deportes:["proyecto deportivo o de acondicionamiento","liderazgo deportivo comunitario"], danza:"danza a elección", test:"evaluación del plan de entrenamiento y sus resultados" },
+};
+
+// Ejemplos de actividades concretas por contexto (evita respuestas genéricas)
+const EJEMPLOS_ACTIVIDADES = `
+EJEMPLOS DE ACTIVIDADES ESPECÍFICAS (úsalos como referencia de nivel de detalle):
+
+Para FUNDAMENTOS TÉCNICOS de voleibol:
+- "Ejercicio de toque de dedos en parejas: uno lanza desde abajo, el otro toca hacia arriba 10 veces, luego intercambian. Progresión: autopasar 5 veces seguidas sin error."
+- "Situación 2v2 en cancha reducida (3x3m): solo se permiten toques de dedos. El equipo que comete error pierde el punto."
+
+Para CONDICIÓN FÍSICA con FC:
+- "Circuito de 5 estaciones × 3 series (trabajo 40 seg / pausa 20 seg): estación A trote en zigzag entre conos, B saltos laterales en escalera de coordinación, C burpees modificados (sin salto), D skipping con rodillas al pecho, E carrera lateral con cambio de dirección. Al final de cada circuito completo, medir FC por palpación carotídea 15 seg × 4. Meta: mantener entre 130–160 bpm (zona aeróbica para 14 años)."
+
+Para TÁCTICA de fútbol:
+- "Situación 3v1 en cuadrado de 8x8m: los tres atacantes deben dar al menos 5 pases antes de intentar salir por una línea. El defensor presiona activamente. Rotación del defensor cada 90 segundos. Consigna ofensiva: moverse al triángulo cuando un compañero tiene el balón."
+
+Para TEST DE COOPER:
+- "Calentamiento específico: 10 min trote suave + activación muscular. Protocolo: correr la mayor distancia posible en 12 minutos sobre pista marcada cada 50m. Registrar metros completados. Escala de referencia MINEDUC 7° básico hombres: Excelente >2400m / Bueno 2000–2400m / Regular 1600–2000m / Bajo <1600m."
+`;
+
+// Genera contexto curricular enriquecido para el prompt
+const buildCurriculoPrompt = (nivel, eje, oaIds) => {
+  const allOAs = getOAs(nivel, eje);
+  const selected = oaIds?.length ? allOAs.filter(o => oaIds.includes(o.id)) : allOAs;
+  const nivelLabel = getNivelLabel(nivel);
+  const ejeLabel = getEjes(nivel)[eje] || eje;
+  const contenidos = CONTENIDOS_MINIMOS[nivel] || {};
+
+  const oaBlock = selected.map(oa =>
+    `• ${oa.id}: ${oa.texto}\n  → Indicadores observables: ${oa.indicadores.join(" / ")}`
+  ).join("\n\n");
+
+  const contenidosBlock = contenidos.deportes
+    ? `Deportes y contenidos mínimos del nivel: ${contenidos.deportes.join(", ")}.\nTest aplicables: ${contenidos.test}.`
+    : "";
+
+  return { nivelLabel, ejeLabel, oaBlock, selectedOAs: selected, contenidosBlock };
+};
+
 function PageIA({ db, curso, mutate }) {
-  const [form, setForm] = useState({ nivel: curso?.nivel||"7b", eje:"hm", duracion:"90", espacio:"Cancha exterior", contexto:"" });
+  const nivelInicial = curso?.nivel || "7b";
+  const [form, setForm] = useState({
+    nivel: nivelInicial,
+    eje: Object.keys(getEjes(nivelInicial))[0],
+    duracion: "90",
+    espacio: "Cancha exterior",
+    alumnos: "28",
+    contexto: "",
+    unidad: "1",
+  });
   const [selectedOAs, setSelectedOAs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [loadMsg, setLoadMsg] = useState("");
   const [result, setResult] = useState(null);
 
-  const oaList = OA_MAP[`${form.nivel}-${form.eje}`] || [];
-  const toggleOA = (id) => setSelectedOAs(prev => prev.includes(id) ? prev.filter(o=>o!==id) : [...prev, id]);
+  const ejes = getEjes(form.nivel);
+  const oaList = getOAs(form.nivel, form.eje);
+  const toggleOA = (id) => setSelectedOAs(prev =>
+    prev.includes(id) ? prev.filter(o => o !== id) : [...prev, id]
+  );
+
+  // Cuando cambia nivel, resetea eje y OAs seleccionados
+  const handleNivelChange = (e) => {
+    const nuevo = e.target.value;
+    const primerEje = Object.keys(getEjes(nuevo))[0];
+    setForm(f => ({ ...f, nivel: nuevo, eje: primerEje }));
+    setSelectedOAs([]);
+    setResult(null);
+  };
 
   const generate = async () => {
     setLoading(true); setResult(null); setProgress(0);
-    const iv = setInterval(() => setProgress(p => Math.min(p + Math.random()*6, 90)), 150);
+    const msgs = [
+      "Leyendo bases curriculares MINEDUC...",
+      "Diseñando estructura pedagógica...",
+      "Elaborando actividades específicas...",
+      "Ajustando indicadores de evaluación...",
+    ];
+    let msgIdx = 0;
+    setLoadMsg(msgs[0]);
+    const iv = setInterval(() => {
+      setProgress(p => Math.min(p + Math.random() * 5, 90));
+      msgIdx = Math.min(msgIdx + 1, msgs.length - 1);
+      setLoadMsg(msgs[msgIdx]);
+    }, 600);
 
-    const oasText = selectedOAs.length ? selectedOAs.join(", ") : oaList.map(o=>o.id).join(", ");
-    const prompt = `Eres Profe-EFI, un asistente especializado en Educación Física para Chile.
-Genera una planificación de sesión completa con estos parámetros:
-- Nivel: ${NIVELES[form.nivel]||form.nivel}
-- Eje: ${EJES[form.eje]}
-- Objetivos de Aprendizaje MINEDUC: ${oasText}
-- Duración: ${form.duracion} minutos
-- Espacio: ${form.espacio}
-- Contexto adicional: ${form.contexto||"ninguno"}
+    const { nivelLabel, ejeLabel, oaBlock, selectedOAs: oasUsados, contenidosBlock } = buildCurriculoPrompt(form.nivel, form.eje, selectedOAs);
+    const durMin = parseInt(form.duracion);
+    const inicioMin = Math.round(durMin * 0.15);
+    const desarrolloMin = Math.round(durMin * 0.65);
+    const cierreMin = durMin - inicioMin - desarrolloMin;
 
-Responde SOLO en JSON con esta estructura exacta (sin markdown, sin texto extra):
+    const prompt = `Eres Profe-EFI, un asistente pedagógico experto en Educación Física para Chile, con conocimiento profundo de:
+- Bases Curriculares MINEDUC 2013 (1°–6° básico)  
+- Bases Curriculares MINEDUC 2015/2019 (7° básico–4° medio)
+- Planes y Programas de Estudio de Educación Física (todos los niveles)
+- Didáctica de la Educación Física: metodologías de enseñanza, estilos de enseñanza (mando directo, descubrimiento guiado, resolución de problemas), progresión pedagógica
+- Evaluación de habilidades motrices, condición física y actitudes
+
+═══════════════════════════════════════
+DATOS DE LA SESIÓN A PLANIFICAR:
+═══════════════════════════════════════
+- Nivel: ${nivelLabel}
+- Eje temático: ${ejeLabel}
+- Duración total: ${durMin} minutos
+  • Inicio: ~${inicioMin} min
+  • Desarrollo: ~${desarrolloMin} min  
+  • Cierre: ~${cierreMin} min
+- Espacio disponible: ${form.espacio}
+- Número de estudiantes: ${form.alumnos}
+- Unidad del año: ${form.unidad}
+${form.contexto ? `- Observaciones del profe: ${form.contexto}` : ""}
+
+═══════════════════════════════════════
+OBJETIVOS DE APRENDIZAJE (Bases Curriculares MINEDUC):
+═══════════════════════════════════════
+${oaBlock}
+
+${contenidosBlock ? `═══════════════════════════════════════\nCONTENIDOS MÍNIMOS OBLIGATORIOS DEL NIVEL:\n═══════════════════════════════════════\n${contenidosBlock}` : ""}
+
+${EJEMPLOS_ACTIVIDADES}
+
+═══════════════════════════════════════
+INSTRUCCIONES PEDAGÓGICAS OBLIGATORIAS:
+═══════════════════════════════════════
+
+1. ESPECIFICIDAD: Cada actividad debe tener NOMBRE PROPIO, descripción de organización del grupo (individual, parejas, tríos, equipos), dimensiones del espacio si aplica, número de repeticiones/series/tiempo, y consigna clara para los estudiantes. NUNCA escribas "realizar ejercicios de calentamiento" — escribe el ejercicio exacto.
+
+2. PROGRESIÓN PEDAGÓGICA: Las actividades deben ir de menor a mayor complejidad. Si es deporte: gesto técnico aislado → ejercicio analítico → situación de juego reducido → juego real con regla adaptada.
+
+3. CONEXIÓN CON LOS OA: El desarrollo debe responder DIRECTAMENTE al texto del OA. Si el OA habla de "combinar habilidades motrices", el desarrollo debe incluir situaciones donde se combinen explícitamente.
+
+4. REALISMO CHILENO: Usa materiales disponibles en colegios chilenos comunes. Adapta al espacio indicado. Si es "Cancha exterior", no uses materiales de gimnasio especializado.
+
+5. INICIO CONTEXTUALIZADO: El juego activador debe ser temáticamente relacionado con el contenido (si la sesión es de voleibol, el calentamiento implica toques, no solo trote).
+
+6. CIERRE SIGNIFICATIVO: El cierre debe incluir vuelta a la calma ESPECÍFICA para los grupos musculares trabajados + reflexión que conecte la vivencia con el aprendizaje del OA.
+
+7. INDICADORES OBSERVABLES: Los indicadores deben ser conductas que el profe pueda VER durante la clase, no parafrasear el OA.
+
+Responde EXCLUSIVAMENTE en JSON válido (sin markdown, sin texto antes o después):
 {
-  "titulo": "Título de la sesión",
-  "inicio": { "duracion": "X min", "actividades": ["actividad 1", "actividad 2"] },
-  "desarrollo": { "duracion": "X min", "actividades": ["actividad 1", "actividad 2", "actividad 3"] },
-  "cierre": { "duracion": "X min", "actividades": ["actividad 1", "actividad 2"] },
-  "indicadores": ["indicador 1", "indicador 2", "indicador 3"],
-  "recursos": ["recurso 1", "recurso 2", "recurso 3"],
-  "oas_cubiertos": ["OA1","OA3"]
+  "titulo": "Título específico que nombre el contenido y la habilidad (ej: 'Voleibol: toque de dedos y mancheta en situación de juego 2v2')",
+  "objetivo_sesion": "Al finalizar la sesión, los/as estudiantes serán capaces de... [verbo concreto + contenido + contexto]",
+  "inicio": {
+    "duracion": "${inicioMin} min",
+    "nombre": "Nombre del juego o actividad activadora",
+    "actividades": [
+      "Descripción completa actividad 1: organización, consigna, variante y conexión con el contenido",
+      "Descripción actividad 2 si corresponde al tiempo disponible"
+    ]
+  },
+  "desarrollo": {
+    "duracion": "${desarrolloMin} min",
+    "nombre": "Nombre de la actividad o situación principal",
+    "actividades": [
+      "Parte 1 — Ejercicio analítico/técnico: descripción detallada con organización, dimensiones, repeticiones y consigna",
+      "Parte 2 — Situación táctica o progresión: descripción con variantes y criterios de éxito",
+      "Parte 3 — Juego o situación de aplicación real: reglas, organización de equipos, criterio de evaluación"
+    ]
+  },
+  "cierre": {
+    "duracion": "${cierreMin} min",
+    "nombre": "Nombre del cierre",
+    "actividades": [
+      "Vuelta a la calma específica: ejercicios de estiramiento o respiración nombrados para los grupos musculares trabajados, con duración por ejercicio",
+      "Reflexión o registro: pregunta concreta de metacognición o actividad de autoevaluación vinculada al OA"
+    ]
+  },
+  "indicadores": [
+    "Indicador 1: conducta observable específica (ej: 'Ejecuta el toque de dedos con extensión completa de brazos en 7 de 10 intentos')",
+    "Indicador 2: conducta observable específica",
+    "Indicador 3: actitudinal o cognitivo observable"
+  ],
+  "recursos": ["lista de materiales concretos con cantidad estimada para ${form.alumnos} estudiantes"],
+  "oas_cubiertos": ${JSON.stringify((selectedOAs.length ? selectedOAs : (getOAs(form.nivel, form.eje).map(o=>o.id))))} ,
+  "adecuaciones": "Indicación concreta para estudiantes con eximición parcial o necesidades especiales: qué rol alternativo asumen y cómo se evalúan"
 }`;
 
     try {
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:1000, messages:[{ role:"user", content:prompt }] })
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "anthropic-dangerous-direct-browser-access": "true",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 3000,
+          messages: [{ role: "user", content: prompt }]
+        })
       });
       const data = await resp.json();
-      const text = data.content?.map(c=>c.text||"").join("").replace(/```json|```/g,"").trim();
+      const text = data.content?.map(c => c.text || "").join("").replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(text);
+      // Asegurar que oas_cubiertos siempre tiene valor
+      if (!parsed.oas_cubiertos || !parsed.oas_cubiertos.length) {
+        parsed.oas_cubiertos = getOAs(form.nivel, form.eje).map(o => o.id);
+      }
       clearInterval(iv); setProgress(100);
       setTimeout(() => { setLoading(false); setResult(parsed); }, 300);
-    } catch(e) {
+    } catch (e) {
       clearInterval(iv); setLoading(false);
+      const oasDelNivel = getOAs(form.nivel, form.eje);
+      const oasUsadosFallback = selectedOAs.length
+        ? oasDelNivel.filter(o => selectedOAs.includes(o.id))
+        : oasDelNivel;
+      const contenidos = CONTENIDOS_MINIMOS[form.nivel] || {};
+      const deporte = contenidos.deportes?.[0] || "actividad motriz";
+
       setResult({
-        titulo:`Sesión de ${EJES[form.eje]} · ${NIVELES[form.nivel]}`,
-        inicio:{ duracion:"15 min", actividades:["Movilidad articular progresiva en círculo", "Juego activador: chapas por posta"] },
-        desarrollo:{ duracion:"60 min", actividades:["Circuito de 5 estaciones con rotación cada 12 min","Trote continuo, saltos escalera, burpees, carrera lateral, skipping","Registro de FC en cada pausa de rotación"] },
-        cierre:{ duracion:"15 min", actividades:["Estiramiento estático guiado en parejas","Reflexión grupal: escala de esfuerzo Borg"] },
-        indicadores:["Mantiene FC en zona aeróbica ≥65% del tiempo","Completa al menos 4 de 5 estaciones","Registra su percepción de esfuerzo correctamente"],
-        recursos:["Escalera de coordinación","Conos (20)","Cronómetro / app Profe-EFI"],
-        oas_cubiertos: selectedOAs.length ? selectedOAs : [oaList[0]?.id].filter(Boolean)
+        titulo: `${ejeLabel}: sesión práctica — ${nivelLabel}`,
+        objetivo_sesion: `Al finalizar la sesión, los/as estudiantes serán capaces de aplicar los contenidos de ${ejeLabel} según las Bases Curriculares MINEDUC para ${nivelLabel}.`,
+        inicio: {
+          duracion:`${inicioMin} min`,
+          nombre:"Activación específica del contenido",
+          actividades:[
+            `Calentamiento dinámico vinculado al contenido de ${deporte}: movilidad articular de los segmentos corporales involucrados (tobillos, rodillas, cadera, hombros), seguido de juego activador relacionado con los gestos técnicos de la sesión. Duración: ${Math.round(inicioMin*0.6)} min de movimiento activo.`,
+            `Activación del sistema cardiovascular: juego de persecución o posta temática relacionada con ${deporte}. El grupo completo participa. Consigna: llegar al ${Math.round(inicioMin*0.4)} min con FC elevada y listos para el trabajo técnico.`
+          ]
+        },
+        desarrollo: {
+          duracion:`${desarrolloMin} min`,
+          nombre:"Trabajo técnico-táctico progresivo",
+          actividades:[
+            `Fase 1 — Ejercicio analítico (${Math.round(desarrolloMin*0.3)} min): trabajo del gesto técnico principal de ${deporte} de forma aislada. Organización en parejas o tríos. El docente demuestra y los estudiantes practican con feedback individual.`,
+            `Fase 2 — Situación reducida (${Math.round(desarrolloMin*0.4)} min): aplicación del gesto en situación de juego reducido (2v2 o 3v3). Espacio delimitado. El docente observa y corrige. Progresión: agregar una dificultad variable.`,
+            `Fase 3 — Juego real (${Math.round(desarrolloMin*0.3)} min): partido o situación de juego con reglas adaptadas que prioricen el OA trabajado. Organización por equipos. El docente evalúa indicadores.`
+          ]
+        },
+        cierre: {
+          duracion:`${cierreMin} min`,
+          nombre:"Vuelta a la calma y reflexión de aprendizaje",
+          actividades:[
+            `Estiramiento estático (${Math.round(cierreMin*0.6)} min): estirar los grupos musculares más exigidos en la sesión. 30 segundos por posición, sin rebote. El docente guía y nombra cada músculo.`,
+            `Reflexión de cierre (${Math.round(cierreMin*0.4)} min): pregunta al grupo — ¿Qué fue lo más difícil? ¿Qué mejorarías para la próxima sesión? Conectar con el OA trabajado. Registro opcional en cuaderno de EF.`
+          ]
+        },
+        indicadores: oasUsadosFallback.flatMap(o => o.indicadores?.slice(0,1) || []).slice(0,3),
+        recursos: [`Material para ${deporte} (cantidad según grupos de trabajo)`, "Conos para delimitar espacios", "Cronómetro", "Silbato", "Planilla de registro si corresponde"],
+        oas_cubiertos: oasUsadosFallback.map(o => o.id),
+        adecuaciones: `Estudiantes con eximición parcial: asumen rol de árbitro o registrador de datos. Se evalúan por comprensión táctica y conocimiento de reglas, no por ejecución física.`
       });
     }
   };
@@ -567,65 +941,111 @@ Responde SOLO en JSON con esta estructura exacta (sin markdown, sin texto extra)
   const guardar = () => {
     if (!result) return;
     mutate(d => {
-      d.sesiones.push({ id:uid(), cursoId:curso.id, titulo:result.titulo, fecha: new Date().toISOString().slice(0,10),
-        duracion:+form.duracion, espacio:form.espacio, eje:form.eje,
-        oas:result.oas_cubiertos||[], estado:"planificada", generadaIA:true });
+      d.sesiones.push({
+        id: uid(), cursoId: curso.id, titulo: result.titulo,
+        fecha: new Date().toISOString().slice(0, 10),
+        duracion: +form.duracion, espacio: form.espacio, eje: form.eje,
+        oas: result.oas_cubiertos || [], estado: "planificada", generadaIA: true
+      });
       return d;
     });
-    alert("✅ Sesión guardada en Planificación");
+    alert("Sesión guardada en Planificación");
   };
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
       <Card>
-        <SectionTitle>Configuración · Bases curriculares MINEDUC Chile 2023</SectionTitle>
+        <SectionTitle>Generador de sesiones — Bases Curriculares MINEDUC</SectionTitle>
+        <Grid cols={2} gap={10} style={{ marginBottom:12 }}>
+          <div>
+            <div style={{ fontSize:12, color:"#8a93a8", marginBottom:4 }}>Nivel</div>
+            <Select value={form.nivel} onChange={handleNivelChange}>
+              {Object.entries(CURRICULO.niveles).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
+            </Select>
+          </div>
+          <div>
+            <div style={{ fontSize:12, color:"#8a93a8", marginBottom:4 }}>Eje temático</div>
+            <Select value={form.eje} onChange={e => { setForm(f=>({...f,eje:e.target.value})); setSelectedOAs([]); }}>
+              {Object.entries(ejes).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
+            </Select>
+          </div>
+        </Grid>
         <Grid cols={3} gap={10} style={{ marginBottom:12 }}>
-          <div><div style={{ fontSize:12, color:"#8a93a8", marginBottom:4 }}>Nivel</div>
-            <Select value={form.nivel} onChange={e=>setForm(f=>({...f,nivel:e.target.value}))}>
-              {Object.entries(NIVELES).map(([k,v])=><option key={k} value={k}>{v}</option>)}
-            </Select></div>
-          <div><div style={{ fontSize:12, color:"#8a93a8", marginBottom:4 }}>Eje temático</div>
-            <Select value={form.eje} onChange={e=>setForm(f=>({...f,eje:e.target.value}))}>
-              {Object.entries(EJES).map(([k,v])=><option key={k} value={k}>{v}</option>)}
-            </Select></div>
-          <div><div style={{ fontSize:12, color:"#8a93a8", marginBottom:4 }}>Duración</div>
+          <div>
+            <div style={{ fontSize:12, color:"#8a93a8", marginBottom:4 }}>Duración</div>
             <Select value={form.duracion} onChange={e=>setForm(f=>({...f,duracion:e.target.value}))}>
-              <option value="45">45 min</option><option value="90">90 min</option><option value="120">120 min</option>
-            </Select></div>
+              <option value="45">45 min</option>
+              <option value="90">90 min</option>
+              <option value="120">120 min</option>
+            </Select>
+          </div>
+          <div>
+            <div style={{ fontSize:12, color:"#8a93a8", marginBottom:4 }}>N° estudiantes</div>
+            <Input type="number" value={form.alumnos} min="5" max="45"
+              onChange={e=>setForm(f=>({...f,alumnos:e.target.value}))} />
+          </div>
+          <div>
+            <div style={{ fontSize:12, color:"#8a93a8", marginBottom:4 }}>Unidad</div>
+            <Select value={form.unidad} onChange={e=>setForm(f=>({...f,unidad:e.target.value}))}>
+              {[1,2,3,4].map(n => <option key={n} value={n}>Unidad {n}</option>)}
+            </Select>
+          </div>
         </Grid>
         <div style={{ marginBottom:12 }}>
           <div style={{ fontSize:12, color:"#8a93a8", marginBottom:4 }}>Espacio disponible</div>
           <Select value={form.espacio} onChange={e=>setForm(f=>({...f,espacio:e.target.value}))}>
-            {["Cancha exterior","Gimnasio","Pista deportiva","Sala multiusos"].map(e=><option key={e}>{e}</option>)}
+            {["Cancha exterior","Gimnasio","Pista deportiva / atletismo","Sala multiusos","Piscina"].map(e => <option key={e}>{e}</option>)}
           </Select>
         </div>
+
+        {/* OA con texto completo */}
         <div style={{ marginBottom:12 }}>
-          <div style={{ fontSize:12, color:"#8a93a8", marginBottom:8 }}>OA a trabajar (opcional — si no seleccionas, usa todos)</div>
-          <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
-            {oaList.map(oa => (
-              <button key={oa.id} onClick={()=>toggleOA(oa.id)}
-                style={{ padding:"5px 10px", borderRadius:6, border:"1px solid", fontSize:12, cursor:"pointer",
-                  background:selectedOAs.includes(oa.id)?"rgba(74,222,128,0.15)":"rgba(255,255,255,0.05)",
-                  borderColor:selectedOAs.includes(oa.id)?"#4ade80":"rgba(255,255,255,0.1)",
-                  color:selectedOAs.includes(oa.id)?"#4ade80":"#8a93a8" }}>
-                {oa.label}
-              </button>
-            ))}
+          <div style={{ fontSize:12, color:"#8a93a8", marginBottom:8 }}>
+            Objetivos de Aprendizaje — selecciona los que trabajarás (opcional)
           </div>
+          <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+            {oaList.map(oa => {
+              const sel = selectedOAs.includes(oa.id);
+              return (
+                <button key={oa.id} onClick={() => toggleOA(oa.id)}
+                  style={{ textAlign:"left", padding:"10px 12px", borderRadius:8, border:"1px solid", cursor:"pointer",
+                    background: sel ? "rgba(74,222,128,0.08)" : "rgba(255,255,255,0.03)",
+                    borderColor: sel ? "#4ade80" : "rgba(255,255,255,0.08)",
+                  }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:3 }}>
+                    <span style={{ fontSize:11, fontWeight:700, color: sel?"#4ade80":"#6b7280",
+                      background: sel?"rgba(74,222,128,0.15)":"rgba(255,255,255,0.06)",
+                      padding:"2px 7px", borderRadius:4 }}>{oa.id}</span>
+                    {sel && <span style={{ fontSize:10, color:"#4ade80" }}>Seleccionado</span>}
+                  </div>
+                  <div style={{ fontSize:12, color: sel?"#d1d5db":"#8a93a8", lineHeight:1.5 }}>{oa.texto}</div>
+                </button>
+              );
+            })}
+          </div>
+          {oaList.length === 0 && (
+            <div style={{ fontSize:12, color:"#6b7280", fontStyle:"italic" }}>
+              Selecciona un nivel y eje para ver los OA disponibles.
+            </div>
+          )}
         </div>
+
         <div style={{ marginBottom:16 }}>
           <div style={{ fontSize:12, color:"#8a93a8", marginBottom:4 }}>Contexto del grupo (opcional)</div>
           <Input value={form.contexto} onChange={e=>setForm(f=>({...f,contexto:e.target.value}))}
-            placeholder="Ej: grupo con bajo nivel de resistencia, 3 alumnos con eximición..." />
+            placeholder="Ej: grupo con bajo nivel de condición física, 3 eximidos, sin gimnasio disponible, trabajando voleibol..." />
         </div>
-        <Btn onClick={generate} style={{ width:"100%", justifyContent:"center" }}>Generar sesión con IA</Btn>
+        <Btn onClick={generate} style={{ width:"100%", justifyContent:"center" }}>
+          <Sparkles size={15} /> Generar sesión con IA
+        </Btn>
       </Card>
 
       {loading && (
         <Card>
-          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
-            <div style={{ width:16, height:16, border:"2px solid rgba(255,255,255,0.1)", borderTopColor:"#4ade80", borderRadius:"50%", animation:"spin 0.7s linear infinite" }} />
-            <span style={{ fontSize:13, color:"#8a93a8" }}>Generando sesión con IA MINEDUC...</span>
+          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
+            <div style={{ width:15, height:15, border:"2px solid rgba(255,255,255,0.08)", borderTopColor:"#4ade80",
+              borderRadius:"50%", animation:"spin 0.7s linear infinite", flexShrink:0 }} />
+            <span style={{ fontSize:13, color:"#8a93a8" }}>{loadMsg}</span>
           </div>
           <ProgressBar value={progress} />
           <style>{`@keyframes spin { to { transform:rotate(360deg) } }`}</style>
@@ -633,63 +1053,86 @@ Responde SOLO en JSON con esta estructura exacta (sin markdown, sin texto extra)
       )}
 
       {result && (
-        <Card style={{ borderColor:"rgba(74,222,128,0.2)" }}>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:14 }}>
-            <div>
-              <div style={{ fontWeight:700, fontSize:16, marginBottom:4 }}>{result.titulo}</div>
-              <div style={{ display:"flex", gap:4, flexWrap:"wrap" }}>
-                {(result.oas_cubiertos||[]).map(o=><Tag key={o} color="green">{o}</Tag>)}
-                <Tag color="blue">{EJES[form.eje]}</Tag>
-                <Tag color="blue">{form.duracion} min</Tag>
-              </div>
+        <Card style={{ borderColor:"rgba(74,222,128,0.15)" }}>
+          <div style={{ marginBottom:14 }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+              <div style={{ fontWeight:700, fontSize:16, letterSpacing:"-0.3px", flex:1, marginRight:10 }}>{result.titulo}</div>
+              <Tag color="green">MINEDUC</Tag>
             </div>
-            <Tag color="green">MINEDUC 2023</Tag>
+            {result.objetivo_sesion && (
+              <div style={{ fontSize:13, color:"#8a93a8", lineHeight:1.5, marginBottom:10,
+                background:"rgba(255,255,255,0.03)", padding:"8px 12px", borderRadius:8,
+                borderLeft:"2px solid rgba(74,222,128,0.4)" }}>
+                <span style={{ fontSize:11, color:"#4ade80", fontWeight:600, display:"block", marginBottom:3 }}>OBJETIVO DE LA SESIÓN</span>
+                {result.objetivo_sesion}
+              </div>
+            )}
+            <div style={{ display:"flex", gap:4, flexWrap:"wrap" }}>
+              {(result.oas_cubiertos||[]).map(o => <Tag key={o} color="green">{o}</Tag>)}
+              <Tag color="blue">{ejes[form.eje]}</Tag>
+              <Tag color="blue">{form.duracion} min</Tag>
+              <Tag>{CURRICULO.niveles[form.nivel]}</Tag>
+            </div>
           </div>
 
           {[
-            { key:"inicio",     label:"Inicio",      color:"#4ade80" },
-            { key:"desarrollo", label:"Desarrollo",  color:"#f97316" },
-            { key:"cierre",     label:"Cierre",      color:"#60a5fa" },
+            { key:"inicio",     label:"Inicio",      color:"#4ade80", border:"rgba(74,222,128,0.2)" },
+            { key:"desarrollo", label:"Desarrollo",  color:"#f97316", border:"rgba(249,115,22,0.2)" },
+            { key:"cierre",     label:"Cierre",      color:"#60a5fa", border:"rgba(96,165,250,0.2)" },
           ].map(fase => (
-            <div key={fase.key} style={{ marginBottom:14 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
+            <div key={fase.key} style={{ marginBottom:14, background:"rgba(255,255,255,0.02)",
+              border:`1px solid ${fase.border}`, borderRadius:10, padding:"12px 14px" }}>
+              <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10 }}>
+                <div style={{ width:3, height:20, background:fase.color, borderRadius:2, flexShrink:0 }} />
                 <span style={{ fontWeight:600, fontSize:13, color:fase.color }}>{fase.label}</span>
-                <Tag>{result[fase.key]?.duracion}</Tag>
+                {result[fase.key]?.nombre && (
+                  <span style={{ fontSize:12, color:"#8a93a8" }}>— {result[fase.key].nombre}</span>
+                )}
+                <Tag style={{ marginLeft:"auto" }}>{result[fase.key]?.duracion}</Tag>
               </div>
-              {(result[fase.key]?.actividades||[]).map((a,i) => (
-                <div key={i} style={{ display:"flex", gap:10, marginBottom:6, alignItems:"flex-start" }}>
-                  <div style={{ width:20, height:20, borderRadius:"50%", background:fase.color, color:"#0f1117", fontSize:10, fontWeight:700,
-                    display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, marginTop:1 }}>{i+1}</div>
-                  <div style={{ fontSize:13, color:"#d1d5db", lineHeight:1.6 }}>{a}</div>
+              {(result[fase.key]?.actividades||[]).map((a, i) => (
+                <div key={i} style={{ display:"flex", gap:10, marginBottom:8, alignItems:"flex-start" }}>
+                  <div style={{ width:22, height:22, borderRadius:"50%", background:fase.color,
+                    color:"#0f1117", fontSize:10, fontWeight:700, display:"flex", alignItems:"center",
+                    justifyContent:"center", flexShrink:0, marginTop:1 }}>{i+1}</div>
+                  <div style={{ fontSize:13, color:"#c9d1d9", lineHeight:1.65 }}>{a}</div>
                 </div>
               ))}
             </div>
           ))}
 
-          <div style={{ height:1, background:"rgba(255,255,255,0.07)", margin:"14px 0" }} />
-          <Grid cols={2} gap={12}>
-            <div>
-              <div style={{ fontSize:11, color:"#4ade80", fontWeight:600, textTransform:"uppercase", marginBottom:8 }}>Indicadores de evaluación</div>
-              {(result.indicadores||[]).map((ind,i) => (
-                <div key={i} style={{ display:"flex", gap:8, marginBottom:6, fontSize:12, color:"#d1d5db", alignItems:"flex-start" }}>
-                  <span style={{ color:"#4ade80", flexShrink:0 }}>✓</span>{ind}
+          <Grid cols={2} gap={12} style={{ marginBottom:12 }}>
+            <div style={{ background:"rgba(74,222,128,0.04)", border:"1px solid rgba(74,222,128,0.12)", borderRadius:10, padding:"12px 14px" }}>
+              <div style={{ fontSize:11, color:"#4ade80", fontWeight:600, textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:10 }}>Indicadores de evaluación</div>
+              {(result.indicadores||[]).map((ind, i) => (
+                <div key={i} style={{ display:"flex", gap:8, marginBottom:7, fontSize:12, color:"#c9d1d9", alignItems:"flex-start" }}>
+                  <CheckCircle2 size={13} style={{ color:"#4ade80", flexShrink:0, marginTop:1 }} />
+                  {ind}
                 </div>
               ))}
             </div>
-            <div>
-              <div style={{ fontSize:11, color:"#60a5fa", fontWeight:600, textTransform:"uppercase", marginBottom:8 }}>Recursos y materiales</div>
-              {(result.recursos||[]).map((r,i) => (
-                <div key={i} style={{ display:"flex", gap:8, marginBottom:6, fontSize:12, color:"#d1d5db", alignItems:"flex-start" }}>
-                  <span style={{ color:"#60a5fa", flexShrink:0 }}>·</span>{r}
+            <div style={{ background:"rgba(96,165,250,0.04)", border:"1px solid rgba(96,165,250,0.12)", borderRadius:10, padding:"12px 14px" }}>
+              <div style={{ fontSize:11, color:"#60a5fa", fontWeight:600, textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:10 }}>Recursos y materiales</div>
+              {(result.recursos||[]).map((r, i) => (
+                <div key={i} style={{ display:"flex", gap:8, marginBottom:7, fontSize:12, color:"#c9d1d9", alignItems:"flex-start" }}>
+                  <Circle size={5} style={{ color:"#60a5fa", flexShrink:0, marginTop:5 }} />
+                  {r}
                 </div>
               ))}
+              {result.adecuaciones && (
+                <div style={{ marginTop:10, padding:"8px 10px", background:"rgba(249,115,22,0.08)",
+                  borderRadius:8, border:"1px solid rgba(249,115,22,0.2)" }}>
+                  <div style={{ fontSize:10, color:"#f97316", fontWeight:600, marginBottom:3 }}>ADECUACIONES</div>
+                  <div style={{ fontSize:11, color:"#c9d1d9", lineHeight:1.5 }}>{result.adecuaciones}</div>
+                </div>
+              )}
             </div>
           </Grid>
 
-          <div style={{ display:"flex", gap:8, marginTop:14, flexWrap:"wrap" }}>
-            <Btn onClick={guardar}>Guardar en planificación</Btn>
-            <Btn variant="secondary" onClick={generate}>Regenerar</Btn>
-            <Btn variant="secondary">Exportar PDF</Btn>
+          <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+            <Btn onClick={guardar}><Save size={14} /> Guardar en planificación</Btn>
+            <Btn variant="secondary" onClick={generate}><RefreshCw size={14} /> Regenerar</Btn>
+            <Btn variant="secondary"><FileText size={14} /> Exportar PDF</Btn>
           </div>
         </Card>
       )}
